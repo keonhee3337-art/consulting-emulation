@@ -16,13 +16,13 @@ from typing import Optional
 # ---------------------------------------------------------------------------
 # Database path — same SQLite used by FinAgent's sql_agent.py
 # ---------------------------------------------------------------------------
-DB_PATH = os.path.join(
-    os.path.dirname(__file__),
-    "../../../../FinAgent/data/financial.db"
-)
-
-# Normalize to absolute path so relative resolution doesn't bite us
-DB_PATH = os.path.abspath(DB_PATH)
+_LOCAL_DB = os.path.abspath(os.path.join(
+    os.path.dirname(__file__), "../../../../FinAgent/data/financial.db"
+))
+_BUNDLED_DB = os.path.abspath(os.path.join(
+    os.path.dirname(__file__), "../finagent/data/financial.db"
+))
+DB_PATH = _LOCAL_DB if os.path.exists(_LOCAL_DB) else _BUNDLED_DB
 
 # ---------------------------------------------------------------------------
 # DCF assumptions (stated explicitly for portfolio/interview transparency)

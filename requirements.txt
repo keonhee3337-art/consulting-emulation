@@ -1,0 +1,16 @@
+streamlit
+python-dotenv
+langchain
+langchain-openai
+langgraph
+openai
+plotly
+rank-bm25
+python-pptx
+xgboost
+scikit-learn
+dart-fss
+pandas
+numpy
+fastapi
+uvicorn

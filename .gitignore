@@ -7,3 +7,5 @@ dart_live.db
 *.egg-info/
 dist/
 build/
+.streamlit/secrets.toml
+finagent/data/vector_store.json
