@@ -1,0 +1,56 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: FinAgent — Multi-agent financial analysis API on AWS Lambda
+
+Globals:
+  Function:
+    Timeout: 60          # LangGraph pipeline can take 20-30s; 60s is safe headroom
+    MemorySize: 1024     # numpy + pandas + LangGraph need memory; increase to 2048 if cold starts are slow
+    Runtime: python3.11
+    Environment:
+      Variables:
+        OPENAI_API_KEY: !Ref OpenAIApiKey
+        SUPABASE_URL: !Ref SupabaseUrl
+        SUPABASE_API_KEY: !Ref SupabaseApiKey
+
+Parameters:
+  OpenAIApiKey:
+    Type: String
+    NoEcho: true
+    Description: OpenAI API key for GPT-4o and text-embedding-3-small
+  SupabaseUrl:
+    Type: String
+    Description: Supabase project URL (used for Postgres checkpointing if enabled)
+    Default: ""
+  SupabaseApiKey:
+    Type: String
+    NoEcho: true
+    Description: Supabase anon/service key
+    Default: ""
+
+Resources:
+  FinAgentFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: lambda_handler.handler
+      CodeUri: ./
+      Description: FinAgent LangGraph pipeline — RAG + Text2SQL + Report generation
+      Events:
+        ApiRoot:
+          Type: HttpApi
+          Properties:
+            Path: /
+            Method: ANY
+        ApiProxy:
+          Type: HttpApi
+          Properties:
+            Path: /{proxy+}
+            Method: ANY
+
+Outputs:
+  ApiUrl:
+    Description: API Gateway endpoint URL — update Streamlit API_URL env var to this
+    Value: !Sub 'https://${ServerlessHttpApi}.execute-api.${AWS::Region}.amazonaws.com/'
+  FunctionArn:
+    Description: Lambda function ARN
+    Value: !GetAtt FinAgentFunction.Arn

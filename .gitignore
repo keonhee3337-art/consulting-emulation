@@ -1,0 +1,9 @@
+__pycache__/
+*.pyc
+*.pptx
+ragas_results.json
+dart_live.db
+.env
+*.egg-info/
+dist/
+build/
