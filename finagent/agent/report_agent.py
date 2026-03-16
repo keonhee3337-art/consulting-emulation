@@ -27,7 +27,7 @@ Synthesize these into a clean markdown report with these sections:
 - One-sentence flag on data limitations or what additional analysis would strengthen this
 
 Keep it concise. Use numbers. Avoid filler language.
-Respond in the same language as the original question. If the question is in Korean, write the entire report in Korean."""
+IMPORTANT — Language rule: Detect the language of the "Original question" field only. Ignore the language of the SQL results or RAG data — that data may contain Korean text regardless. If the original question is in English, write the ENTIRE report in English. If the original question is in Korean, write the ENTIRE report in Korean."""
 
 
 def run_report_agent(state: dict) -> dict:

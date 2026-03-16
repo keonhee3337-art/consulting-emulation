@@ -253,7 +253,7 @@ def _sheet_dcf(wb, company, dcf, financial_rows):
 
 # ── Sheet 3: Comps ─────────────────────────────────────────────────────────
 def _sheet_comps(wb, company, comps):
-    ws = wb.create_sheet("Comps (EV/EBITDA)")
+    ws = wb.create_sheet("Comps (EV-EBITDA)")
     ws.sheet_view.showGridLines = False
 
     title = ws.cell(row=1, column=1, value=f"Comparable Company Analysis — {company}")
