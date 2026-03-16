@@ -57,6 +57,8 @@ st.set_page_config(
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap');
+@import url('https://fonts.googleapis.com/icon?family=Material+Icons');
 
 html, body, [class*="css"], [class*="stMarkdown"], p, li, span, div {
     font-family: 'Inter', 'Calibri', 'Segoe UI', sans-serif !important;
@@ -161,13 +163,13 @@ def _chart_financial_history(company: str) -> None:
     ))
 
     fig.update_layout(
-        **CHART_LAYOUT,
+        **{**CHART_LAYOUT, "margin": dict(l=0, r=4, t=64, b=20)},
         title=dict(
             text=f"{company} — Revenue & Profit (KRW bn)",
             font=CHART_TITLE_FONT, x=0,
         ),
         barmode="group",
-        height=300,
+        height=360,
         legend=dict(orientation="h", yanchor="bottom", y=1.0, xanchor="left", x=0,
                     font=dict(size=10)),
         xaxis=dict(showgrid=False, tickfont=CHART_FONT),
@@ -303,7 +305,7 @@ def _chart_valuation_comparison(dcf: dict, comps: dict, company: str) -> None:
     ))
 
     fig.update_layout(
-        **CHART_LAYOUT,
+        **{**CHART_LAYOUT, "margin": dict(l=0, r=80, t=44, b=0)},
         title=dict(
             text=f"{company} — Valuation Range",
             font=CHART_TITLE_FONT, x=0,
@@ -314,7 +316,6 @@ def _chart_valuation_comparison(dcf: dict, comps: dict, company: str) -> None:
                    title="KRW (billions)", title_font=dict(size=11)),
         yaxis=dict(showgrid=False,
                    tickfont=dict(size=11, family="Inter, Calibri, sans-serif")),
-        margin=dict(l=0, r=80, t=44, b=0),
     )
     st.plotly_chart(fig, use_container_width=True)
 
@@ -363,19 +364,20 @@ st.divider()
 # ---------------------------------------------------------------------------
 # Query input
 # ---------------------------------------------------------------------------
-col_input, col_btn = st.columns([4, 1])
-with col_input:
-    query = st.text_input(
-        "query",
-        placeholder=(
-            '"What is Samsung\'s valuation?"  |  '
-            '"Compare SK Hynix and Samsung profitability 2021–2023"  |  '
-            '"Explain the HBM opportunity for Korean chipmakers"'
-        ),
-        label_visibility="collapsed",
-    )
-with col_btn:
-    run_button = st.button("Run Analysis", type="primary", use_container_width=True)
+with st.form("query_form"):
+    col_input, col_btn = st.columns([4, 1])
+    with col_input:
+        query = st.text_input(
+            "query",
+            placeholder=(
+                '"What is Samsung\'s valuation?"  |  '
+                '"Compare SK Hynix and Samsung profitability 2021–2023"  |  '
+                '"Explain the HBM opportunity for Korean chipmakers"'
+            ),
+            label_visibility="collapsed",
+        )
+    with col_btn:
+        run_button = st.form_submit_button("Run Analysis", type="primary", use_container_width=True)
 
 # ---------------------------------------------------------------------------
 # Analysis
@@ -456,6 +458,28 @@ if run_button and query.strip():
         st.markdown('<p class="section-label">Analysis</p>', unsafe_allow_html=True)
         if report:
             st.markdown(report)
+            if st.button("한국어로 번역", key="translate_btn"):
+                with st.spinner("번역 중..."):
+                    from openai import OpenAI as _OAI
+                    _oai_key = os.getenv("OPENAI_API_KEY") or st.secrets.get("OPENAI_API_KEY", "")
+                    _client = _OAI(api_key=_oai_key)
+                    _resp = _client.chat.completions.create(
+                        model="gpt-4o",
+                        messages=[
+                            {"role": "system", "content": (
+                                "Translate the following financial analysis report into Korean. "
+                                "Keep all numbers, company names, and financial terms intact. "
+                                "Preserve the markdown structure."
+                            )},
+                            {"role": "user", "content": report},
+                        ],
+                        temperature=0.1,
+                    )
+                    st.session_state.korean_report = _resp.choices[0].message.content
+            if st.session_state.get("korean_report"):
+                st.divider()
+                st.markdown('<p class="section-label">한국어 번역</p>', unsafe_allow_html=True)
+                st.markdown(st.session_state.korean_report)
         else:
             st.warning("No report generated.")
 
