@@ -395,6 +395,7 @@ ROUTE_COLORS = {
     "both":      "#7c3aed",
 }
 
+# Run analysis and store results in session state
 if run_button and query.strip():
     with st.spinner("Running analysis..."):
         result = graph.invoke(
@@ -406,12 +407,42 @@ if run_button and query.strip():
     report         = result.get("report", "")
     valuation_text = result.get("valuation_result", None)
 
-    # Detect company
     company_name = "Target Company"
     for name, keywords in COMPANY_MAP.items():
         if any(kw in query.lower() for kw in keywords):
             company_name = name
             break
+
+    dcf_data, comps_data = {}, {}
+    if company_name != "Target Company":
+        rows = _fetch_company_financials(company_name)
+        if rows:
+            all_cos    = _fetch_all_companies()
+            dcf_data   = _run_dcf(rows, company_name)
+            comps_data = _run_comps(company_name, all_cos)
+
+    st.session_state.last_result = {
+        "route": route,
+        "report": report,
+        "valuation_text": valuation_text,
+        "company_name": company_name,
+        "dcf_data": dcf_data,
+        "comps_data": comps_data,
+    }
+    st.session_state.korean_report = None  # reset translation on new query
+
+elif run_button and not query.strip():
+    st.warning("Please enter a query before running.")
+
+# Render results from session state (persists across reruns from other buttons)
+if "last_result" in st.session_state:
+    r            = st.session_state.last_result
+    route        = r["route"]
+    report       = r["report"]
+    valuation_text = r["valuation_text"]
+    company_name = r["company_name"]
+    dcf_data     = r["dcf_data"]
+    comps_data   = r["comps_data"]
 
     # Route badge
     badge_color = ROUTE_COLORS.get(route, "#6b7280")
@@ -423,15 +454,6 @@ if run_button and query.strip():
         unsafe_allow_html=True,
     )
     st.divider()
-
-    # --- Pull structured valuation data for charts ---
-    dcf_data, comps_data = {}, {}
-    if company_name != "Target Company":
-        rows = _fetch_company_financials(company_name)
-        if rows:
-            all_cos   = _fetch_all_companies()
-            dcf_data  = _run_dcf(rows, company_name)
-            comps_data = _run_comps(company_name, all_cos)
 
     # --- Valuation KPI metrics row (valuation route only) ---
     if route == "valuation" and dcf_data.get("ev_dcf_bn") is not None:
@@ -541,6 +563,3 @@ if run_button and query.strip():
     finally:
         if os.path.exists(tmp_path):
             os.remove(tmp_path)
-
-elif run_button and not query.strip():
-    st.warning("Please enter a query before running.")
