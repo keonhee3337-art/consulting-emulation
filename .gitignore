@@ -8,4 +8,3 @@ dart_live.db
 dist/
 build/
 .streamlit/secrets.toml
-finagent/data/vector_store.json
