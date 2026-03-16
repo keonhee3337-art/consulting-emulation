@@ -60,7 +60,7 @@ st.markdown("""
 @import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap');
 @import url('https://fonts.googleapis.com/icon?family=Material+Icons');
 
-html, body, [class*="css"], [class*="stMarkdown"], p, li, span, div {
+html, body, [class*="css"], [class*="stMarkdown"], p, li, div {
     font-family: 'Inter', 'Calibri', 'Segoe UI', sans-serif !important;
     font-size: 14px;
     line-height: 1.6;
