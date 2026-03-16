@@ -38,6 +38,7 @@ from agents.valuation_agent import (
     _run_comps,
 )
 from output.pptx_generator import generate_deck
+from output.excel_generator import generate_excel
 
 import plotly.graph_objects as go
 
@@ -563,3 +564,17 @@ if "last_result" in st.session_state:
     finally:
         if os.path.exists(tmp_path):
             os.remove(tmp_path)
+
+    # --- Excel download (valuation queries only) ---
+    if route == "valuation" and dcf_data.get("ev_dcf_bn") is not None:
+        try:
+            financial_rows = _fetch_company_financials(company_name)
+            excel_buf = generate_excel(company_name, dcf_data, comps_data, financial_rows)
+            st.download_button(
+                label="Download DCF Model (Excel)",
+                data=excel_buf,
+                file_name=f"{company_name.replace(' ', '_')}_dcf_model.xlsx",
+                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            )
+        except Exception as _e:
+            st.caption(f"Excel export unavailable: {_e}")
