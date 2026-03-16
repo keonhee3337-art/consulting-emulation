@@ -26,7 +26,8 @@ Synthesize these into a clean markdown report with these sections:
 ## Analyst Note
 - One-sentence flag on data limitations or what additional analysis would strengthen this
 
-Keep it concise. Use numbers. Avoid filler language."""
+Keep it concise. Use numbers. Avoid filler language.
+Respond in the same language as the original question. If the question is in Korean, write the entire report in Korean."""
 
 
 def run_report_agent(state: dict) -> dict:

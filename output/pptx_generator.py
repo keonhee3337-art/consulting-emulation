@@ -402,6 +402,58 @@ def _slide_4_strategic(prs: Presentation, section_text: str):
     _add_bullet_list(slide, bullets, top=Inches(1.3))
 
 
+def _parse_valuation_bullets(valuation_result: str) -> list[str]:
+    """
+    Extract clean bullet lines from the raw valuation agent text.
+    The raw text uses === borders, [ SECTION ] headers, and key: value lines.
+    Returns a concise list suitable for a slide bullet list.
+    """
+    bullets = []
+    dcf_ev = comps_ev = val_range = wacc = tgr = None
+
+    for line in valuation_result.splitlines():
+        line = line.strip()
+        if not line or line.startswith("=") or line.startswith("[") or line.startswith("Key") or line.startswith("Peer multiples"):
+            continue
+        # Skip sub-header lines
+        if line.startswith("SK Hynix") or line.startswith("Samsung Electronics:"):
+            continue
+
+        # Extract key metrics
+        if "Enterprise Value (DCF)" in line:
+            dcf_ev = re.sub(r".*?:\s*", "", line).strip()
+        elif "Enterprise Value (Comps)" in line:
+            comps_ev = re.sub(r".*?:\s*", "", line).strip()
+        elif line.startswith("Range:"):
+            val_range = line
+        elif "WACC" in line and "%" in line:
+            wacc = line.strip()
+        elif "Terminal growth rate" in line:
+            tgr = line.strip()
+
+    if dcf_ev:
+        bullets.append(f"DCF Enterprise Value:  {dcf_ev}")
+    if comps_ev:
+        bullets.append(f"EV/EBITDA Comps:  {comps_ev}")
+    if val_range:
+        bullets.append(val_range)
+    if wacc:
+        bullets.append(f"Assumption — {wacc}")
+    if tgr:
+        bullets.append(f"Assumption — {tgr}")
+
+    # Fallback: if parsing extracted nothing, take first 5 non-empty non-border lines
+    if not bullets:
+        for line in valuation_result.splitlines():
+            line = line.strip()
+            if line and not line.startswith("=") and not line.startswith("["):
+                bullets.append(line)
+            if len(bullets) >= 5:
+                break
+
+    return bullets
+
+
 def _slide_5_analyst(prs: Presentation, section_text: str,
                      valuation_result: str | None):
     """Slide 5: Analyst Note + optional Valuation summary — white bg."""
@@ -417,13 +469,12 @@ def _slide_5_analyst(prs: Presentation, section_text: str,
     rule.line.fill.background()
 
     analyst_text = section_text.strip() if section_text else "No analyst note available."
-    # Remove leading bullet markers for the note (it's usually a single sentence)
     analyst_text = re.sub(r'^[-*]\s+', '', analyst_text)
 
     _add_textbox(
         slide, analyst_text,
         Inches(0.5), Inches(1.4),
-        Inches(12.3), Inches(2.5),
+        Inches(12.3), Inches(2.0),
         font_size=BODY_PT, color=DARK
     )
 
@@ -431,25 +482,20 @@ def _slide_5_analyst(prs: Presentation, section_text: str,
         # Section label
         _add_textbox(
             slide, "Valuation Summary",
-            Inches(0.5), Inches(4.0),
+            Inches(0.5), Inches(3.6),
             Inches(12.3), Inches(0.4),
             font_size=SMALL_PT + 2, bold=True, color=NAVY
         )
         # Thin gold divider
         div = slide.shapes.add_shape(
-            1, Inches(0.5), Inches(4.45), Inches(12.0), Pt(1)
+            1, Inches(0.5), Inches(4.05), Inches(12.0), Pt(1)
         )
         _rgb_fill(div, GOLD)
         div.line.fill.background()
 
-        # Valuation content at smaller font
-        val_text = valuation_result.strip()
-        _add_textbox(
-            slide, val_text,
-            Inches(0.5), Inches(4.6),
-            Inches(12.3), Inches(2.5),
-            font_size=SMALL_PT, color=DARK
-        )
+        # Parse into clean bullets instead of dumping raw text
+        val_bullets = _parse_valuation_bullets(valuation_result)
+        _add_bullet_list(slide, val_bullets, top=Inches(4.15), max_h=Inches(3.0))
 
 
 # ---------------------------------------------------------------------------
