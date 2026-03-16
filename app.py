@@ -53,14 +53,14 @@ st.set_page_config(
 # ---------------------------------------------------------------------------
 # Custom CSS — Inter font, consulting document feel
 # Calibri is standard at McKinsey/BCG; Inter is the closest open-weight web equivalent.
+# Note: `span` intentionally excluded from font override — Streamlit uses span
+# elements for Material Symbols icons; overriding font-family breaks them.
 # ---------------------------------------------------------------------------
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap');
-@import url('https://fonts.googleapis.com/icon?family=Material+Icons');
 
-html, body, [class*="css"], [class*="stMarkdown"], p, li, span, div {
+html, body, [class*="css"], [class*="stMarkdown"], p, li, div {
     font-family: 'Inter', 'Calibri', 'Segoe UI', sans-serif !important;
     font-size: 14px;
     line-height: 1.6;
