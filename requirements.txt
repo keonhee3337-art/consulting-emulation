@@ -12,5 +12,3 @@ scikit-learn
 dart-fss
 pandas
 numpy
-fastapi
-uvicorn
