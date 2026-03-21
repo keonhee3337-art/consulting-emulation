@@ -300,13 +300,13 @@ def _chart_valuation_comparison(dcf: dict, comps: dict, company: str) -> None:
         x=values, y=labels,
         orientation="h",
         marker_color=colors,
-        text=[f"KRW {v:,.1f} bn" for v in values],
+        text=[f"KRW {v:,.0f} bn" for v in values],
         textposition="outside",
         textfont=dict(size=10),
     ))
 
     fig.update_layout(
-        **{**CHART_LAYOUT, "margin": dict(l=0, r=80, t=44, b=0)},
+        **{**CHART_LAYOUT, "margin": dict(l=0, r=120, t=44, b=0)},
         title=dict(
             text=f"{company} — Valuation Range",
             font=CHART_TITLE_FONT, x=0,
@@ -384,9 +384,9 @@ with st.form("query_form"):
 # Analysis
 # ---------------------------------------------------------------------------
 COMPANY_MAP = {
-    "Samsung Electronics": ["samsung electronics", "samsung"],
-    "SK Hynix":            ["sk hynix", "hynix"],
-    "LG Electronics":      ["lg electronics", "lg"],
+    "Samsung Electronics": ["samsung electronics", "samsung", "삼성전자", "삼성"],
+    "SK Hynix":            ["sk hynix", "hynix", "sk하이닉스", "하이닉스", "sk 하이닉스"],
+    "LG Electronics":      ["lg electronics", "lg", "lg전자", "엘지전자", "엘지"],
 }
 
 ROUTE_COLORS = {
@@ -465,11 +465,11 @@ if "last_result" in st.session_state:
         st.markdown('<p class="section-label">Valuation Summary</p>', unsafe_allow_html=True)
         k1, k2, k3, k4 = st.columns(4)
         with k1:
-            st.metric("EV — DCF", f"KRW {ev_dcf:,.1f} bn" if ev_dcf else "—")
+            st.metric("EV — DCF", f"KRW {ev_dcf:,.0f} bn" if ev_dcf else "—")
         with k2:
-            st.metric("EV — Comps", f"KRW {ev_comps:,.1f} bn" if ev_comps else "—")
+            st.metric("EV — Comps", f"KRW {ev_comps:,.0f} bn" if ev_comps else "—")
         with k3:
-            st.metric("Midpoint", f"KRW {midpoint:,.1f} bn" if midpoint else "—")
+            st.metric("Midpoint", f"KRW {midpoint:,.0f} bn" if midpoint else "—")
         with k4:
             st.metric("WACC Used", "10.0%")
         st.divider()
