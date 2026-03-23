@@ -2,7 +2,7 @@ streamlit
 python-dotenv
 langchain
 langchain-openai
-langgraph
+langgraph>=1.0.0
 openai
 plotly
 rank-bm25
